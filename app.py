@@ -1,7 +1,9 @@
 import sqlite3, string, random
 from flask import Flask, request, redirect, jsonify
+from werkzeug.middleware.proxy_fix import ProxyFix   # NEW (line 1 of 3)
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)   # NEW (line 2 of 3)
 DB = "urls.db"
 
 def get_db():
@@ -52,6 +54,7 @@ def stats(code):
         return jsonify(error="Not found"), 404
     return jsonify(dict(row))
 
+init_db()   # NEW (line 3 of 3): moved out of the __main__ block so it also runs on Render
+
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True)
